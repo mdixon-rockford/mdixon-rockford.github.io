@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Book Lookup Orchestration - Rockford Consulting LLC</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #555;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            border: 1px solid #ddd;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Address Book Lookup Orchestration</h1>
+    <p><em>By Mark Dixon, Rockford Consulting LLC</em></p>
+
+    <h2>Introduction</h2>
+    <p>The following is a simple orchestration for the JD Edwards Address Book to look up and/or verify a partially entered street address.</p>
+
+    <h2>End User Experience</h2>
+    <p>Before we delve into the details behind the lookup function, let's look at how the end user can make use of it during day-to-day activities.  Our example starts with the addition of an address book record for which we have limited and possibly inaccurate information:</p>
+    <p>From Work With Addresses click Add (i.e., “+” button)</p>
+    <img src="images/ab_screenshot1.png" alt="Screenshot 1: Work with Addresses">
+    <p>Enter the Alpha Name, click on the mailing tab</p>
+    <img src="images/ab_screenshot2.png" alt="Screenshot 2: Alpha Name Entry">
+    <p>In the Mailing Address screen, let’s assume you know the zip code of the person whom you have entered, but not much else.  In that case, enter the zip code and hit the “Validate Address From Bing Maps” button:</p>
+    <img src="images/ab_screenshot3.png" alt="Screenshot 3: Address Book Revisions">
+    <p>You should see the city, state and county populated:</p>
+    <img src="images/ab_screenshot4.png" alt="Screenshot 4: City, State, County">
+    <p>Now, we need to get the street address but we’re not 100% sure of the spelling, nomenclature, etc.
+For example, the full street address for this address book record is:</p>
+<dl>
+  <dd><small>3764 Elvis Presley Boulevard (Highway 51 South)</small></dd>
+</dl>
+<p>That’s a relatively complicated street address.  If the information I am given is partial and/or not entirely accurate, like “Elvis Street”,  I may need help filling it out:</p>
+    <img src="images/ab_screenshot5.png" alt="Screenshot 5: Partial Street Address">
+    <p>After entering the partial and somewhat inaccurate data we have been given we can hit the “Validate Address From Bing Maps” button.  The street address should then default in based on mapping service data:</p>
+    <img src="images/ab_screenshot6.png" alt="Screenshot 6: Validate Street Address">
+    <p>You should now have a populated address for the record that has been validated via a standard mapping service.  To assist in further validation, you may also use a direct mapping function via CAFE1 functionality.  Please see our other topic on this feature.</p>	
+
+
+    <h2>Mapping Service</h2>
+    <p>To establish the lookup function you will first need to set up a REST connection to a mapping service.  We chose Bing Maps, for various reasons, but this should work with any of the major mapping services.  You will likely need to subscribe to the service and receive a key to be used when requesting address data.  The service is called via a URL that is constructed from elements taken from the address book screen.  
+
+<p>For Bing Maps, the URL is constructed as follows:</p>
+<dl>
+<dd><small>http://dev.virtualearth.net/REST/v1/Locations?countryRegion={countryRegion}&adminDistrict={adminDistrict}&locality={locality}&postalCode={postalCode}&addressLine={addressLine}&userLocation={userLocation}&userIp={userIp}&usermapView={usermapView}&includeNeighborhood={includeNeighborhood}&maxResults={maxResults}&key={BingMapsKey}</small></dd>
+</dl>
+
+<p>Not every field shown in the URL above is required.  A simplified request can be sent with only the few fields from the address book:</p>
+
+<dl>
+<dd><small>http://dev.virtualearth.net/REST/v1/Locations?adminDistrict={adminDistrict}&locality={locality}&postalCode={postalCode}&addressLine={addressLine}&key={BingMapsKey}</small></dd>
+</dl>
+
+<p>Each mapping service will have its own format to retrieve address data.</p>
+
+    <h2>Orchestration Powering the Lookup Function</h2>
+    <p>The orchestration used to provide this functionality within the JDE application consists of several elements:</p>
+    <img src="images/ab_screenshot7.png" alt="Screenshot 7: AB Lookup Orchestration">
+<p>#1 - Custom Service Request – Constructs a URL from data entered entered on the JDE address book screen to feed the mapping service</p>
+<p>#2 - Data Connection – Sends formatted URL data to the mapping service (as shown above) and returns formatted data</p>
+<p>#3 - Data Request – To return the country code from JDE UDC 00/CN based on the country description returned by the mapping service</p>
+<p>#4 - Custom Service Request – Replaces nulls returned by the mapping service with spaces to prevent errors when populating JDE</p>
+<p>#5 - Custom Service Request – Removes leading spaces from the country code in anticipation of populating the country field</p>
+<p>#6 - Custom Service Request – Remove the word “county” from the county returned by the mapping service</p>
+
+<p>Create a Form Extension, add a button and associate the orchestration with the button: </p>
+    <img src="images/ab_screenshot8.png" alt="Screenshot 8: Add Orchestration to Form">
+<p>Your Address Book lookup function should now be ready to use</p>
+    <h2>Notes</h2>
+<ul>
+<li>This example was written in JD Edwards EnterpriseOne / Application level 9.2, Update 8 / Tools 9.2.8.1.  Some of the features identified in the example may not be available depending on your application/tools level.</li>
+<li>The functions are only as good as the mapping service can provide, in this case Bing Maps.  You may find certain combinations of city, zip, and partial street addresses work well and other combinations don’t work as well.  However, the functions provide a level of assistance above and beyond vanilla JDE.</li> 
+<li>Also, even if you get what appears to be correct data returned this not foolproof.  Some US zip codes straddle multiple cities, counties and, in some cases even states.  But it should get you the correct data in most cases and should at least get you in a better position to research in the case of multiples.</li>
+</ul>
+
+    <h2>Closing thought</h2>
+
+    <p>In this exercise we showed how useful a simple lookup function can be that makes use of an Orchestration with several elements called from a Form Extension - all of them User Defined Objects (UDOs) that don't require development resources or modifications to base JDE code. All elements should survive future application and tools release upgrades with little to no retrofit.  If you have any questions/comments on this or similar functions, please use our Contact Us feature.</p>
+
+    <a href="index.html" class="back-link">Back to Home</a>
+</body>
+</html>
