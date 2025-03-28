@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPI Index Retrieval - Rockford Consulting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #555;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            border: 1px solid #ddd;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>JDE UDO Example – CPI Index Retrieval</h1>
+    <p><em>By Mark Dixon, Rockford Consulting LLC</em></p>
+
+    <h2>Introduction</h2>
+    <p>The following is a collection of user defined objects (UDOs) developed for the JD Edwards Real Estate Management module that retrieves the consumer price index (CPI) for a given month from the appropriate US government website and populates the data into JDE.</p>
+
+    <h2>Background</h2>
+    <p>The JDE Real Estate Management module allows clients to manage all aspect of leasing and property management, including managing the payment of and billing for leases.  Many of the terms of these leases include provisions to automatically escalate the lease amount to be paid or billed based on the rate of inflation as defined by the U.S. Bureau of Labor Statistics (BLS).  This example automates the retrival of the index values and population into JDE for the current month .</p>
+
+    <h2>How does it work?</h2>
+    <p>CPI indices are maintained by the user via P1550, Work with Escalation Indices.  From here one can either add a new index or revise an existing index.  Let’s assume we are revising an existing index in March of 2025, which will update February as the last complete month:</p>
+    <img src="images/cpi_screenshot1.png" alt="Screenshot 1: Work with Indices">
+    <p>After drilling into year 2025, one can see the February index is blank:</p>
+    <img src="images/cpi_screenshot2.png" alt="Screenshot 2: Escalation Index Revision">
+    <p>Rather than manually update the value, hit the Close button and go back the Work With Escalation Indices screen.  Note that a button titled “Update CPI from BLS” is in the header area.  Click that button:</p>
+    <img src="images/cpi_screenshot3.png" alt="Screenshot 3: Update CPI Button Pressed">
+    <p>You may notice a progress bar in the upper right corner as the function runs.  When the update is complete you should see the following confirmation screen:</p>
+    <img src="images/cpi_screenshot4.png" alt="Screenshot 4: CPI Retrieval Complete">
+    <p>After the process is complete, drill back into the Escalation Index Revision screen.  Notice that the February index is now populated:</p>
+    <img src="images/cpi_screenshot5.png" alt="Screenshot 5: CPI Refresh Escalation Indices">
+
+    <h2>Setting Up a Connection to the US Bureau of Labor Statistics</h2>
+    <p>The BLS.gov website allows for JSON connections to retrieve indices via the following format:</p>
+<dl>
+<dd>https://api.bls.gov/publicAPI/v2/timeseries/data/<series_id></dd>
+</dl>
+<p>Registration is required (no payment needed) to obtain a key.   After receiving the key, we must next create a cross reference to match up the BLS indices with our JDE indices.</p>
+The CPI indices maintained by BLS.gov have their own unique identifiers.  For example, the Consumer Price Index for Urban Wage Earners, which we have set up in JDE as CPIU, is referred to by its series ID of CUUR0000SA0.</p>
+
+<p>In order to update the proper index in JDE, we chose to match up the JDE UDC code for the index in question with the BLS series ID via the JDE UDC table 15/IX using Description 2:</p>
+    <img src="images/cpi_screenshot6.png" alt="Screenshot 6: UDC 15/IX">
+
+<p>This set up will not only identify the indices for update but will also serve as the cross reference between JDE and BLS.gov.</p>
+
+    <h2>Orchestration Powering the CPI Retrieval and Update Function</h2>
+    <p>The following orchestration will update all JDE CPI indices in table F1550 that have a cross reference to a BLS.gov series ID: </p>
+    <img src="images/cpi_screenshot7.png" alt="Screenshot 7: All Indices Orchestration">
+<p>#1 - Data Request – Retrieves all CPI indices in JDE UDC 15/IX that have a matching BLS code in Description 02</p>
+<p>#2 - Orchestration - Calls the orchestration (detailed below) iteratively for all CPI indices retrieved in step #1 to update the JDE CPI index table (F1550) with the current month’s values from the BLS.gov website</p>
+
+The orchestration in step #2, above, updates an individual CPI index.  It may be called directly for an individual CPI index or called iteratively in a higher-level calling orchestration as described above to update all flagged indices:
+    <img src="images/cpi_screenshot8.png" alt="Screenshot 8: One Index Orchestration">
+<p>#1 - Data Connection – Constructs a JSON request for the BLS.gov website, passing the BLS Series ID corresponding to the JDE CPI index and returns the current data.</p>
+<p>#2 - Custom Service Request – Strips leading spaces from the UDC value for 15/IX</p>
+<p>#3 - Custom Service Request – Converts the data for the returned BLS Series ID from a 4 digit year to a 2 digit year as required for JDE index entry. </p>
+<p>#4 - Data Request – Determines whether the CPI Index for the year returned by the current BLS data exists by returning the count from the JDE escalation index table, F1550.  If count=0, a later step must add the row.  If the count=1,  a later step must update an existing row.</p>
+<p>#5 - Rule – If the count for the index/year in F1550 is 1, branch to the “update” step, #6a.  If the count is 0, branch to the “update” step, #6b.</p>
+<p>#6a - Form Request – Updates an existing row in F1550, Escalation Indices, with the current value.</p>
+<p>#6b - Form Request – Adds a new row to F1550, Escalation Indices, to the current year with the current value.</p>
+
+<p>Create a Form Extension, add a button and associate the orchestration with the button: </p>
+    <img src="images/cpi_screenshot9.png" alt="Screenshot 8: Add Orchestration to Form">
+<p>Your CPI retrieval function should now be ready to use.</p>
+    <h2>Notes</h2>
+<ul>
+<li>This example was written in JD Edwards EnterpriseOne / Application level 9.2, Update 8 / Tools 9.2.8.1.  Some of the features identified in the example may not be available depending on your application/tools level.</li>
+<li>BLS might possibly change index series codes in the future.  Ensure your cross reference in the UDC is properly maintained.  Also, ensure your own internal procedures account for possible BLS changes to previously-published indices.  As with all automation, ensure you have a process for validating that the indices have been uploaded correctly.</li>
+<li>This information is provided as an example only.  Use at your own risk.</li>
+</ul>
+
+    <h2>Closing thought</h2>
+
+    <p>In this exercise we showed how one can use a simple function to update all CPI indices automatically - exclusively using User Defined Objects (UDOs) that don't require development resources or modifications to base JDE code. All elements should survive future application and tools release upgrades with little to no retrofit.  If you have any questions/comments on this or similar functions, please use our Contact Us feature.</p>
+
+    <a href="index.html" class="back-link">Back to Home</a>
+</body>
+</html>

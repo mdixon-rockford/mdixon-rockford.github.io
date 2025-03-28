@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Address Book Lookup Orchestration - Rockford Consulting LLC</title>
+    <title>Address Book Lookup - Rockford Consulting</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -86,7 +86,7 @@ For example, the full street address for this address book record is:</p>
 <p>#3 - Data Request – To return the country code from JDE UDC 00/CN based on the country description returned by the mapping service</p>
 <p>#4 - Custom Service Request – Replaces nulls returned by the mapping service with spaces to prevent errors when populating JDE</p>
 <p>#5 - Custom Service Request – Removes leading spaces from the country code in anticipation of populating the country field</p>
-<p>#6 - Custom Service Request – Remove the word “county” from the county returned by the mapping service</p>
+<p>#6 - Custom Service Request – Removes the word “county” from the county returned by the mapping service</p>
 
 <p>Create a Form Extension, add a button and associate the orchestration with the button: </p>
     <img src="images/ab_screenshot8.png" alt="Screenshot 8: Add Orchestration to Form">
@@ -96,6 +96,7 @@ For example, the full street address for this address book record is:</p>
 <li>This example was written in JD Edwards EnterpriseOne / Application level 9.2, Update 8 / Tools 9.2.8.1.  Some of the features identified in the example may not be available depending on your application/tools level.</li>
 <li>The functions are only as good as the mapping service can provide, in this case Bing Maps.  You may find certain combinations of city, zip, and partial street addresses work well and other combinations don’t work as well.  However, the functions provide a level of assistance above and beyond vanilla JDE.</li> 
 <li>Also, even if you get what appears to be correct data returned this not foolproof.  Some US zip codes straddle multiple cities, counties and, in some cases even states.  But it should get you the correct data in most cases and should at least get you in a better position to research in the case of multiples.</li>
+<li>This information is provided as an example only.  Use at your own risk.</li>
 </ul>
 
     <h2>Closing thought</h2>
