@@ -1,0 +1,116 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Book CAFE1 Maps - Rockford Consulting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #555;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            border: 1px solid #ddd;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Address Book - Maps via CAFE1</h1>
+    <p><em><center>By Mark Dixon, Rockford Consulting LLC</center></em></p>
+
+    <h2>Introduction</h2>
+    <p>The following is a simple user defined object (UDO)  of type CAFE1 for the JD Edwards Address Book to display a map centered on a point corresponding to the current address book information on the screen.</p>
+
+    <h2>Background</h2>
+    <p>CAFE1 is an acronym for Composite Application Framework for EnterpriseOne.  This feature provides for the presentation of another JDE application or a third party website that may be contextually linked to the form to which the CAFE1 layout is attached.  
+The linking of mapping software to the JDE address book is a very common UDO amongst JDE users due to its simplicity and usefulness.  It is presented here as a companion piece to the address book validation orchestration as another tool to verify address book entries.</p>
+
+    <h2>End User Experience</h2>
+    <p>Prior to going over the process for creating the CAFE1 maps link, let's look at what the end user experience is with the mapping function already in place.</p>
+    <p>From Work With Addresses click Add (i.e., “+” button)</p>
+    <img src="images/ab_maps_screenshot1.png" alt="Screenshot 1: Work with Addresses">
+    <p>Enter the Alpha Name, click on the mailing tab</p>
+    <img src="images/ab_maps_screenshot2.png" alt="Screenshot 2: Alpha Name Entry">
+    <p>Enter the address information.  If you have followed our other topic on UDO development, you can optionally use the Validate Address button to assist in ensuring the correct data is present:</p>
+    <img src="images/ab_maps_screenshot3.png" alt="Screenshot 3: Address Book Revision">
+    <p>In the upper right, choose Layout – Google Maps</p>
+    <img src="images/ab_maps_screenshot4.png" alt="Screenshot 4: Choose Google Maps layout">
+    <p>You should now see a map on the right side of the screen centered on the coordinates corresponding to the street address in the current address book record:</p>
+    <img src="images/ab_maps_screenshot5.png" alt="Screenshot 5: Show Google Maps layout">
+
+
+    <h2>CAFE1 Layout Powering the Mapping Function</h2>
+    <p>The following shows how to set up a mapping website as a CAFE1 layout linked to the address book.  The specific mapping website used is Google Maps, but this concept may be used with other mapping websites as well.
+Click in the upper right on the User name and select Edit Form Layout:</p>
+    <img src="images/ab_maps_screenshot6.png" alt="Screenshot 6: Edit Form Layout">
+    <p>Click in the upper left on the Create New Content icon, as shown below:</p>
+    <img src="images/ab_maps_screenshot7.png" alt="Screenshot 7: Create New Content">
+    <p>Click and drag the URL option to the screen:</p>
+    <img src="images/ab_maps_screenshot8.png" alt="Screenshot 8: Click and Drag URL">
+    <p>When the URL frame is in the desired location, click it to place it:</p>
+    <img src="images/ab_maps_screenshot9.png" alt="Screenshot 9: Place URL">
+    <p>We are using Google Maps for the mapping function, although there are other mapping services you can use.  The format for looking up a specific address in Google Maps is as follows:
+<dd><dl><small>https://maps.google.com/maps?q=<"street_address">,<"city">,<"state">,<"postal">&hl=en&ie=UTF8&output=embed</small></dl>
+</dd>
+So, for the example we have the URL would be:
+<dd><dl><small>https://maps.google.com/maps?q=3764 Elvis Presley Blvd,Memphis,TN,38116&hl=en&ie=UTF8&output=embed</small></dl>
+</dd>
+Cut and paste the URL example filled in into the URL field highlighted below:
+</p>
+    <img src="images/ab_maps_screenshot10.png" alt="Screenshot 10: Create Link to Web Page">
+<p>Enter the name and description.  You can also click the Verify URL button to make sure the URL is correct.</p>
+    <img src="images/ab_maps_screenshot11.png" alt="Screenshot 11: Name and Verify Link to Web Page">
+<p>You should get a message stating that the URL verification was successful if you have formed the URL correctly.</p>
+    <img src="images/ab_maps_screenshot12.png" alt="Screenshot 12: URL Verification">
+<p>Under “What type of link:” select Dynamic Link and under Operation select “is mapped to” for the q parameter:</p>
+    <img src="images/ab_maps_screenshot13.png" alt="Screenshot 13: Define Dynamic Link">
+<p>You should now see each of the input fields has a plus sign enabled.   Click on the appropriate fields required for the URL to function in the correct order.  For the Google Maps URL click first on Address Line 1, then on City, State and Postal Code, in that order. As you click on each field you should see it added to the Path below:</p>
+    <img src="images/ab_maps_screenshot14.png" alt="Screenshot 14: Map Fields to URL">
+<p>Hit the Save button in the upper left:</p>
+    <img src="images/ab_maps_screenshot15.png" alt="Screenshot 15: Save Dynamic Linking">
+<p>The map should now render at the location corresponding to the data in the address book.  Hit the Save button at the top of the page to save the layout.</p>
+    <img src="images/ab_maps_screenshot16.png" alt="Screenshot 16: Save Layout">
+<p>Enter a name for the layout and hit OK:</p>
+    <img src="images/ab_maps_screenshot17.png" alt="Screenshot 17: Enter Layout Name">
+<p>You should see the following screen:</p>
+    <img src="images/ab_maps_screenshot18.png" alt="Screenshot 18: Finalized Layout at Bottom">
+<p>To make changes, such as moving the frame to another position, select the Edit Form Layout as you did when first creating the CAFE1 UDO.  Then click the header of the map UDO and drag it to a different position.  For example, I want to move the wrap to the right of the entry form:</p>
+    <img src="images/ab_maps_screenshot19.png" alt="Screenshot 19: Move Layout to Right Side">
+<p>You should then have the map on the right side of the screen, as follows:</p>
+    <img src="images/ab_maps_screenshot20.png" alt="Screenshot 20: Finalized Layout at Right Side">
+<p>Follow your organization’s procedures to roll out the CAFE1 layout to users as desired.</p>
+
+    <h2>Notes</h2>
+<ul>
+<li>This example was written in JD Edwards EnterpriseOne / Application level 9.2, Update 8 / Tools 9.2.8.1.  Some of the features identified in the example may not be available depending on your application/tools level.</li>
+<li>The results of the map are only as good as the data populated on the JDE input screen.  Part of what makes this solution useful is that, if the map results don’t make sense than the user is motivated to double-check and possibly correct the data. </li> 
+<li>Google Maps was used as the mapping solution.  Other mapping sites may be used, although they have to be able to function as an embedded URL.  The functionality is dependent on a third party, Google in this case,  and changes made by that third party in the future may impact whether the layout will continue to work.  Whoever administers this type of feature at a JDE client needs to monitor whether a third party product like this continues to work and, if not, replace it with one that does.</li>
+<li>This information is provided as an example only.  Use at your own risk.</li>
+</ul>
+
+    <h2>Closing thought</h2>
+
+    <p>We have shown a relatively simple method to graphically display the address entered on the address book screen and done so using a JDE UDO that does not require modifying base JDE code.  Based on experience, this simple add-on has proven to be of great value to help JDE users better understand their data and improve efficiency.  If you have any questions/comments on this or similar functions, please use our Contact Us feature.</p>
+
+    <a href="index.html" class="back-link">Back to Home</a>
+</body>
+</html>
